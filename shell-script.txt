@@ -1,4 +1,7 @@
 #!/bin/bash
+#install git 
+#register my user
+#pull all scripts
 #install minio
 sudo wget https://dl.minio.io/server/minio/release/linux-amd64/minio
 sudo chmod +x minio
@@ -18,8 +21,16 @@ sudo chmod +x minikube
 sudo mkdir -p /usr/local/bin/
 sudo install minikube /usr/local/bin/
 sudo minikube start --vm-driver=none
+#create spinnaker user in minikube
+  #1. generate certificate signed by minikube CA for spinnaker user 
+  #2. create user in minikube with this certificate 
+  #3. create file 
+
 #install hal
 sudo curl -O https://raw.githubusercontent.com/spinnaker/halyard/master/install/debian/InstallHalyard.sh
 sudo touch temp.txt
 sudo echo "ubuntu" > temp.text
 sudo bash InstallHalyard.sh < temp.txt
+sudo mv .hal /usr/local/bin/.hal
+#enable kubernetes on hal
+hal config provider kubernetes enable
