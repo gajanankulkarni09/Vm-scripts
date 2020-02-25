@@ -1,0 +1,25 @@
+#!/bin/bash
+#install minio
+sudo wget https://dl.minio.io/server/minio/release/linux-amd64/minio
+sudo chmod +x minio
+sudo nohup ./minio server /mnt/minio &>dev/null &
+#install docker 
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update
+sudo apt-get install -y docker-ce
+#install kubectl
+sudo curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+sudo chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/kubectl
+#install minikube
+sudo curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo chmod +x minikube
+sudo mkdir -p /usr/local/bin/
+sudo install minikube /usr/local/bin/
+sudo minikube start --vm-driver=none
+#install hal
+sudo curl -O https://raw.githubusercontent.com/spinnaker/halyard/master/install/debian/InstallHalyard.sh
+sudo touch temp.txt
+sudo echo "ubuntu" > temp.text
+sudo bash InstallHalyard.sh < temp.txt

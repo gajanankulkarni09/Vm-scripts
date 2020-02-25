@@ -1,0 +1,26 @@
+#!/bin/bash
+sudo apt-get update -y
+sudo apt-get install xrdp -y
+sudo apt-get install xfce4 -y
+sudo apt-get install xfce4-terminal -y
+sudo sed -i.bak '/fi/a xfce-session ' /etc/xrdp/startwm.sh
+sudo sed -i "/^[^#]*PasswordAuthentication[[:space:]]no/c\PasswordAuthentication yes" /etc/ssh/sshd_config
+echo "Root@1983
+Root@1983" > temp.txt
+sudo passwd ubuntu -q < temp.txt
+> temp.txt
+sudo echo "network:
+        version: 2
+        ethernets:
+          eth0:         
+            nameservers:
+                    addresses: [8.8.8.8, 8.8.4.4]
+            dhcp4-overrides:
+                    use-dns: false " > temp.txt
+sudo mkdir /etc/netplan
+sudo cp temp.txt /etc/netplan/99-custom-dns.yaml
+sudo apt-get install libxss1 libappindicator1 libindicator7 -y
+wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+sudo sh -c 'echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
+sudo apt-get update
+sudo apt-get install google-chrome-stable -y
