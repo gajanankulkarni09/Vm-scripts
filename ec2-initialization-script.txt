@@ -35,5 +35,5 @@ sudo touch log.txt
 sudo chown ubuntu log.txt
 sudo chmod u+rwx log.txt
 sudo echo "started installing docker,kubernetis,spinnaker" >> status.txt
-sudo sh shell-script.txt > log.txt
+#sudo sh shell-script.txt > log.txt
 sudo echo "completed installing docker,kubernetis,spinnaker" >> status.txt
