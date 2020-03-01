@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo -u ubuntu -H sh -c "cd /home/ubuntu; git clone https://github.com/gajanankulkarni09/Vm-scripts.git; cd Vm-scripts; sh ec2-initialization-script.txt" 

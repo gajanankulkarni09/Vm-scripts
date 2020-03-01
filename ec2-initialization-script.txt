@@ -1,4 +1,8 @@
 #!/bin/bash
+sudo touch status.txt
+sudo chown ubuntu status.txt
+sudo chmod u+rwx status.txt
+sudo echo "started installing remote and google chrome" >status.txt
 sudo apt-get update -y
 sudo apt-get install xrdp -y
 sudo apt-get install xfce4 -y
@@ -24,3 +28,12 @@ wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-ke
 sudo sh -c 'echo "deb https://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list'
 sudo apt-get update
 sudo apt-get install google-chrome-stable -y
+sudo echo "completed installing remote and google chrome" > status.txt
+sudo google-chrome --version > status.txt 
+
+sudo touch log.txt
+sudo chown ubuntu log.txt
+sudo chmod u+rwx log.txt
+sudo echo "started installing docker,kubernetis,spinnaker" >> status.txt
+sudo sh shell-script.txt > log.txt
+sudo echo "completed installing docker,kubernetis,spinnaker" >> status.txt

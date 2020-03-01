@@ -1,11 +1,8 @@
 #!/bin/bash
 #install git 
+
 #register my user
 #pull all scripts
-#install minio
-sudo wget https://dl.minio.io/server/minio/release/linux-amd64/minio
-sudo chmod +x minio
-sudo nohup ./minio server /mnt/minio &>dev/null &
 #install docker 
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
@@ -23,14 +20,58 @@ sudo install minikube /usr/local/bin/
 sudo minikube start --vm-driver=none
 #create spinnaker user in minikube
   #1. generate certificate signed by minikube CA for spinnaker user 
+sudo openssl genrsa -out spinnaker.key 2048
+sudo echo "IN" > certificate-temp.txt
+sudo echo "Maharastra" >> certificate-temp.txt
+sudo echo "Pune" >> certificate-temp.txt
+sudo echo "none" >> certificate-temp.txt
+sudo echo "none" >> certificate-temp.txt
+sudo echo "spinnaker" >> certificate-temp.txt
+sudo echo "" >> certificate-temp.txt
+sudo echo "" >> certificate-temp.txt
+sudo echo "" >> certificate-temp.txt
+sudo openssl req -new -key spinnaker.key -out spinnaker.csr < certificate-temp.txt
+sudo openssl x509 -req -in spinnaker.csr -CA ./.minikube/ca.crt -CAkey ./.minikube/ca.key -CAcreateserial -out spinnaker.crt -days 500
+sudo rm certificate-temp.txt
   #2. create user in minikube with this certificate 
-  #3. create file 
+sudo kubectl config set-credentials spinnaker --username=spinnaker --client-certificate=spinnaker.crt --client-key=spinnaker.key --certificate-authority=./.minikube/ca.crt
 
+  #3. assign role to spinnaker user
+sudo kubectl apply -f ./spinnaker-role.yaml
+sudo kubectl apply -f ./spinnaker-role-binding.yaml
+  #4. create context 
+sudo kubectl config set-context spinnaker-context --cluster=minikube --namespace=default --user=spinnaker
 #install hal
 sudo curl -O https://raw.githubusercontent.com/spinnaker/halyard/master/install/debian/InstallHalyard.sh
 sudo touch temp.txt
-sudo echo "ubuntu" > temp.text
+sudo echo "ubuntu" > temp.txt
 sudo bash InstallHalyard.sh < temp.txt
 sudo mv .hal /usr/local/bin/.hal
+#enable docker registery
+ADDRESS=index.docker.io
+REPOSITORIES=gajanankulkarni09/api
+USERNAME=gajanankulkarni09
+PASSWORD=Docker@1983
+sudo hal config provider docker-registry enable
+sudo hal config provider docker-registry account add my-docker-registry --address $ADDRESS --repositories $REPOSITORIES --username $USERNAME --password $PASSWORD
 #enable kubernetes on hal
 hal config provider kubernetes enable
+hal config provider kubernetes account add spinnaker  --provider-version v2  --context spinnaker-context --kubeconfig-file "/home/ubuntu/.kube/config"
+hal config features edit --artifacts true
+#setting up local environement
+hal config deploy edit --type localdebian
+#install minio
+sudo docker pull minio/minio
+sudo docker run -p 9050:9000 minio/minio server /data &>/dev/null &
+#configure hal to use minio
+sudo mkdir ./.hal/default/profiles
+sudo touch ./.hal/default/profiles/front50-local.yml
+sudo echo "spinnaker.s3.versioning: false" > temp.txt
+sudo cp temp.txt ./.hal/default/profiles/front50-local.yml
+sudo rm temp.txt
+hal config storage s3 edit --endpoint http:127.0.0.1:9050 --access-key-id minioadmin --secret-access-key minioadmin
+hal config storage edit --type s3
+#deploy spinnaker
+hal config version edit --version 1.18.4
+sudo setfacl -m u:ubuntu:r /home/ubuntu/.kube/config
+sudo hal deploy apply
